@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server';
 import { fetchNewsData, saveArticles } from '@/lib/news';
 
 export async function GET(request: Request) {
+  // request is used to get searchParams
   const { searchParams } = new URL(request.url);
   const authKey = searchParams.get('key');
+  
+  if (authKey) {
+     // potential check
+  }
 
   // Basic security for cron job if needed
   // if (authKey !== process.env.CRON_SECRET) {
@@ -21,7 +26,7 @@ export async function GET(request: Request) {
 }
 
 // Support POST for manual trigger
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const articles = await fetchNewsData();
     await saveArticles(articles);

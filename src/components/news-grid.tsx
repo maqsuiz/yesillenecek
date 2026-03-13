@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search } from 'lucide-react';
 
 export function NewsGrid() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('Tümü');
@@ -21,8 +22,12 @@ export function NewsGrid() {
     let query = supabase
       .from('news_articles')
       .select('*')
-      .order('published_at', { ascending: false })
-      .range(page * 12, (page + 1) * 12 - 1);
+      .order('published_at', { ascending: false });
+
+    // Handle range based on page
+    const from = isInitial ? 0 : page * 12;
+    const to = isInitial ? 11 : (page + 1) * 12 - 1;
+    query = query.range(from, to);
 
     if (activeCategory !== 'Tümü') {
       query = query.eq('category', activeCategory);
@@ -57,17 +62,11 @@ export function NewsGrid() {
   }, [activeCategory, activeTimeframe, searchQuery, page]);
 
   useEffect(() => {
-    setPage(0);
-    fetchArticles(true);
-  }, [activeCategory, activeTimeframe, searchQuery]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchArticles(page === 0);
+  }, [fetchArticles, page]);
 
-  useEffect(() => {
-    if (page > 0) {
-      fetchArticles();
-    }
-  }, [page]);
-
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (
       window.innerHeight + document.documentElement.scrollTop >=
       document.documentElement.offsetHeight - 100 &&
@@ -76,19 +75,24 @@ export function NewsGrid() {
     ) {
       setPage((prev) => prev + 1);
     }
-  };
+  }, [loading, hasMore]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [loading, hasMore]);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPage(0);
+  }, [activeCategory, activeTimeframe, searchQuery]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Sürdürülebilirlik Nabzı</h1>
-          <p className="text-muted-foreground">Dünyadan ve Türkiye'den en güncel yeşil haberler.</p>
+          <p className="text-muted-foreground">Dünyadan ve Türkiye&apos;den en güncel yeşil haberler.</p>
         </div>
         <div className="md:hidden relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

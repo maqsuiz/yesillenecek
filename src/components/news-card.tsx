@@ -3,7 +3,7 @@ import { tr } from 'date-fns/locale';
 import { ExternalLink, Calendar, Globe } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface NewsCardProps {

@@ -38,7 +38,7 @@ export async function fetchNewsData() {
       const data = await response.json();
 
       if (data.results) {
-        data.results.forEach((item: any) => {
+        data.results.forEach((item: { title: string; description?: string; content?: string; link: string; image_url: string; source_id: string; pubDate: string; language: string; }) => {
           articles.push({
             title: item.title,
             summary: item.description || item.content || '',
@@ -122,7 +122,7 @@ function determineCategory(text: string): string {
   return 'Sürdürülebilirlik';
 }
 
-function extractImageUrl(item: any): string | null {
+function extractImageUrl(item: { enclosure?: { url: string }; [key: string]: unknown }): string | null {
   // Try to find image in enclosure or media:content
   if (item.enclosure && item.enclosure.url) return item.enclosure.url;
   // This is a simplified version, RSS feeds vary a lot
