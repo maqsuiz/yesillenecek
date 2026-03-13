@@ -3,7 +3,8 @@ import { tr } from 'date-fns/locale';
 import { ExternalLink, Calendar, Globe } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export interface NewsCardProps {
   article: {
@@ -74,12 +75,18 @@ export function NewsCard({ article }: NewsCardProps) {
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button variant="ghost" size="sm" asChild className="ml-auto text-green-600 hover:text-green-700 hover:bg-green-50 p-0">
-          <a href={article.url} target="_blank" rel="noopener noreferrer" className="flex items-center">
-            Devamını Oku
-            <ExternalLink className="ml-2 h-4 w-4" />
-          </a>
-        </Button>
+        <a 
+          href={article.url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }), 
+            "ml-auto text-green-600 hover:text-green-700 hover:bg-green-50 p-0 flex items-center h-auto"
+          )}
+        >
+          Devamını Oku
+          <ExternalLink className="ml-2 h-4 w-4" />
+        </a>
       </CardFooter>
     </Card>
   );
