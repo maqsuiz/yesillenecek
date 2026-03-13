@@ -1,3 +1,6 @@
+"use client";
+
+import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { ExternalLink, Calendar, Globe } from 'lucide-react';
@@ -21,19 +24,20 @@ export interface NewsCardProps {
 }
 
 export function NewsCard({ article }: NewsCardProps) {
-  const isCarbonRelated = article.summary.toLowerCase().includes('karbon') || article.title.toLowerCase().includes('karbon');
+  const summary = article.summary || "";
+  const title = article.title || "";
+  const isCarbonRelated = summary.toLowerCase().includes('karbon') || title.toLowerCase().includes('karbon');
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
         {article.image_url ? (
-          <img
+          <Image
             src={article.image_url}
-            alt={article.title}
+            alt={title}
+            fill
             className="h-full w-full object-cover transition-transform hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470115636492-6d2b51253b36?q=80&w=1000&auto=format&fit=crop';
-            }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-green-50 text-green-200">
