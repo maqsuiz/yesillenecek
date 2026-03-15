@@ -4,8 +4,8 @@ import { supabaseAdmin } from './supabase';
 const parser = new Parser({
   customFields: {
     item: [
-      ['media:content', 'media:content'],
-      ['media:thumbnail', 'media:thumbnail'],
+      ['media:content', 'media:content', { keepArray: true }],
+      ['media:thumbnail', 'media:thumbnail', { keepArray: true }],
     ],
   }
 });
