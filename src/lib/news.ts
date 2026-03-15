@@ -122,10 +122,30 @@ function determineCategory(text: string): string {
   return 'Sürdürülebilirlik';
 }
 
-function extractImageUrl(item: { enclosure?: { url: string }; [key: string]: unknown }): string | null {
-  // Try to find image in enclosure or media:content
+function extractImageUrl(item: any): string | null {
+  // 1. Try enclosure (Standard RSS)
   if (item.enclosure && item.enclosure.url) return item.enclosure.url;
-  // This is a simplified version, RSS feeds vary a lot
+
+  // 2. Try media:content (Common in WordPress/Media feeds)
+  if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
+    return item['media:content'].$.url;
+  }
+  
+  // 3. Try another common media:content structure
+  if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$) {
+    return item['media:content'][0].$.url;
+  }
+
+  // 4. Try media:thumbnail
+  if (item['media:thumbnail'] && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) {
+    return item['media:thumbnail'].$.url;
+  }
+
+  // 5. Try parsing from content or summary (Common in blogs)
+  const content = item.content || item.contentSnippet || '';
+  const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+  if (imgMatch && imgMatch[1]) return imgMatch[1];
+
   return null;
 }
 

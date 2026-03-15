@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Sun, Moon } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -41,7 +42,8 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <ThemeToggle />
             <Button 
                 variant="outline" 
                 size="sm" 
