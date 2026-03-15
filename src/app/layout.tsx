@@ -22,9 +22,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" suppressHydrationWarning>
+    <html lang="tr" className={inter.variable} suppressHydrationWarning>
       <body
-        className={`${inter.variable} antialiased`}
+        className="antialiased"
       >
         <ThemeProvider
           attribute="class"
