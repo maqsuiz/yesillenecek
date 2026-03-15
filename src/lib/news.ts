@@ -130,6 +130,11 @@ function extractImageUrl(item: { enclosure?: { url: string }; [key: string]: unk
 }
 
 export async function saveArticles(articles: NewsArticle[]) {
+  if (!supabaseAdmin) {
+    console.warn('Skipping saveArticles: Supabase Admin client not initialized (missing environment variables).');
+    return;
+  }
+
   for (const article of articles) {
     const { error } = await supabaseAdmin
       .from('news_articles')

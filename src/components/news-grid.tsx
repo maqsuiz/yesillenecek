@@ -11,6 +11,7 @@ export function NewsGrid() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorState, setErrorState] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Tümü');
   const [activeTimeframe, setActiveTimeframe] = useState('30d');
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,6 +20,14 @@ export function NewsGrid() {
 
   const fetchArticles = useCallback(async (isInitial = false) => {
     setLoading(true);
+    setErrorState(null);
+    
+    if (!supabase) {
+      setErrorState('Veritabanı bağlantısı kurulamadı. Lütfen Supabase API anahtarlarınızı (Environment Variables) kontrol edin.');
+      setLoading(false);
+      return;
+    }
+
     let query = supabase
       .from('news_articles')
       .select('*')
@@ -110,34 +119,47 @@ export function NewsGrid() {
         setActiveTimeframe={setActiveTimeframe}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {articles.map((article) => (
-          <NewsCard key={article.id} article={article} />
-        ))}
-        {loading && Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="space-y-4">
-            <Skeleton className="aspect-video w-full rounded-xl" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ))}
-      </div>
-
-      {!loading && articles.length === 0 && (
-        <div className="text-center py-20">
-          <p className="text-muted-foreground">Aradığınız kriterlere uygun haber bulunamadı.</p>
+      {errorState && (
+        <div className="mb-8 p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg text-center">
+          <p className="font-medium">{errorState}</p>
+          <p className="text-sm mt-1 opacity-80">
+            Vercel Dashboard üzerinde <code className="bg-destructive/10 px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code> ve <code className="bg-destructive/10 px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ortam değişkenlerinin ayarlandığından emin olun.
+          </p>
         </div>
       )}
 
-      {hasMore && !loading && (
-        <div className="flex justify-center mt-12">
-            <button 
-                onClick={() => setPage(prev => prev + 1)}
-                className="text-primary hover:text-primary/80 font-medium transition-colors"
-            >
-                Daha Fazla Yükle
-            </button>
-        </div>
+      {!errorState && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {articles.map((article) => (
+              <NewsCard key={article.id} article={article} />
+            ))}
+            {loading && Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="aspect-video w-full rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+
+          {!loading && articles.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground">Aradığınız kriterlere uygun haber bulunamadı.</p>
+            </div>
+          )}
+
+          {hasMore && !loading && (
+            <div className="flex justify-center mt-12">
+                <button 
+                    onClick={() => setPage(prev => prev + 1)}
+                    className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                    Daha Fazla Yükle
+                </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
