@@ -6,6 +6,7 @@ import { NewsCard } from './news-card';
 import { Filters } from './filters';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search } from 'lucide-react';
+import { Pagination } from './ui/pagination';
 
 export function NewsGrid() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,10 +16,11 @@ export function NewsGrid() {
   const [activeCategory, setActiveCategory] = useState('Tümü');
   const [activeTimeframe, setActiveTimeframe] = useState('30d');
   const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 20;
 
-  const fetchArticles = useCallback(async (isInitial = false) => {
+  const fetchArticles = useCallback(async () => {
     setLoading(true);
     setErrorState(null);
     
@@ -30,12 +32,12 @@ export function NewsGrid() {
 
     let query = supabase
       .from('news_articles')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('published_at', { ascending: false });
 
     // Handle range based on page
-    const from = isInitial ? 0 : page * 12;
-    const to = isInitial ? 11 : (page + 1) * 12 - 1;
+    const from = (page - 1) * pageSize;
+    const to = page * pageSize - 1;
     query = query.range(from, to);
 
     if (activeCategory !== 'Tümü') {
@@ -55,44 +57,26 @@ export function NewsGrid() {
       query = query.gte('published_at', thirtyDaysAgo);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Error fetching articles:', error);
     } else {
-      if (isInitial) {
-        setArticles(data || []);
-      } else {
-        setArticles((prev) => [...prev, ...(data || [])]);
-      }
-      setHasMore(data?.length === 12);
+      setArticles(data || []);
+      setTotalCount(count || 0);
     }
     setLoading(false);
   }, [activeCategory, activeTimeframe, searchQuery, page]);
 
   useEffect(() => {
-    fetchArticles(page === 0);
-  }, [fetchArticles, page]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop >=
-      document.documentElement.offsetHeight - 100 &&
-      !loading &&
-      hasMore
-    ) {
-      setPage((prev) => prev + 1);
-    }
-  }, [loading, hasMore]);
+    fetchArticles();
+  }, [fetchArticles]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  useEffect(() => {
-    setPage(0);
+    setPage(1);
   }, [activeCategory, activeTimeframe, searchQuery]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -101,12 +85,12 @@ export function NewsGrid() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">Sürdürülebilirlik Nabzı</h1>
           <p className="text-muted-foreground">Dünyadan ve Türkiye&apos;den en güncel yeşil haberler.</p>
         </div>
-        <div className="md:hidden relative">
+        <div className="relative md:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="search"
             placeholder="Ara..."
-            className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm"
+            className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
@@ -134,7 +118,7 @@ export function NewsGrid() {
             {articles.map((article) => (
               <NewsCard key={article.id} article={article} />
             ))}
-            {loading && Array.from({ length: 4 }).map((_, i) => (
+            {loading && Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-4">
                 <Skeleton className="aspect-video w-full rounded-xl" />
                 <Skeleton className="h-4 w-3/4" />
@@ -149,15 +133,15 @@ export function NewsGrid() {
             </div>
           )}
 
-          {hasMore && !loading && (
-            <div className="flex justify-center mt-12">
-                <button 
-                    onClick={() => setPage(prev => prev + 1)}
-                    className="text-primary hover:text-primary/80 font-medium transition-colors"
-                >
-                    Daha Fazla Yükle
-                </button>
-            </div>
+          {!loading && articles.length > 0 && (
+            <Pagination 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={(p) => {
+                setPage(p);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+            />
           )}
         </>
       )}
