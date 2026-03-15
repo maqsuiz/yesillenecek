@@ -28,11 +28,12 @@ const KEYWORDS = "sürdürülebilirlik OR iklim değişikliği OR karbon ayak iz
 const RSS_FEEDS = [
   { url: 'https://yesilgazete.org/feed/', source: 'Yeşil Gazete', lang: 'tr' },
   { url: 'https://www.iklimhaber.org/feed/', source: 'İklim Haber', lang: 'tr' },
+  { url: 'https://www.theguardian.com/environment/rss', source: 'The Guardian', lang: 'en' },
   { url: 'https://www.carbonbrief.org/feed/', source: 'Carbon Brief', lang: 'en' },
-  { url: 'https://www.theguardian.com/environment/rss', source: 'The Guardian Environment', lang: 'en' },
   { url: 'https://e360.yale.edu/feed', source: 'Yale E360', lang: 'en' },
   { url: 'https://www.treehugger.com/feeds/all/', source: 'Treehugger', lang: 'en' },
 ];
+
 
 export async function fetchNewsData() {
   const articles: NewsArticle[] = [];

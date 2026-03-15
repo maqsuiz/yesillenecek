@@ -28,22 +28,39 @@ export function NewsCard({ article }: NewsCardProps) {
   const title = article.title || "";
   const isCarbonRelated = summary.toLowerCase().includes('karbon') || title.toLowerCase().includes('karbon');
 
+  // Premium Placeholder Mapping
+  const getPlaceholder = (category: string) => {
+    switch (category) {
+      case 'Karbon': return '/placeholders/carbon.png';
+      case 'Doğa Yeşillenmesi': return '/placeholders/nature.png';
+      case 'İklim': return '/placeholders/climate.png';
+      case 'Sürdürülebilirlik': return '/placeholders/sustainability.png';
+      default: return '/placeholders/sustainability.png';
+    }
+  };
+
+  const displayImage = article.image_url || getPlaceholder(article.category);
+
   return (
-    <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
+    <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg dark:bg-card/50 dark:backdrop-blur-sm border-primary/10">
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        {article.image_url ? (
-          <Image
-            src={article.image_url}
-            alt={title}
-            fill
-            className="h-full w-full object-cover transition-transform hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary/40">
-            <Globe className="h-12 w-12" />
+        <Image
+          src={displayImage}
+          alt={title}
+          fill
+          className={cn(
+            "h-full w-full object-cover transition-transform duration-500 hover:scale-110",
+            !article.image_url && "opacity-90 saturate-[0.8]"
+          )}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        {!article.image_url && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+             <Globe className="h-5 w-5 text-white/50 mr-2" />
+             <span className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Bülten Görseli</span>
           </div>
         )}
+
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
           <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-foreground">
             {article.category}
