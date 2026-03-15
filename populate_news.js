@@ -48,21 +48,37 @@ function cleanImageUrl(url) {
 }
 
 function extractImageUrl(item) {
-  let url = null;
+  const candidates = [];
+
+  // Helper to add candidates from media fields
+  const addCandidates = (field) => {
+    if (!field) return;
+    const items = Array.isArray(field) ? field : [field];
+    items.forEach(item => {
+      if (item.$ && item.$.url) {
+        const width = parseInt(String(item.$.width || '0'), 10);
+        candidates.push({ url: item.$.url, width });
+      }
+    });
+  };
+
   if (item.enclosure && item.enclosure.url) {
-    url = item.enclosure.url;
-  } else if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
-    url = item['media:content'].$.url;
-  } else if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$) {
-    url = item['media:content'][0].$.url;
-  } else if (item['media:thumbnail'] && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) {
-    url = item['media:thumbnail'].$.url;
-  } else {
+    candidates.push({ url: item.enclosure.url, width: 0 });
+  }
+
+  addCandidates(item['media:content']);
+  addCandidates(item['media:thumbnail']);
+
+  if (candidates.length === 0) {
     const content = item.content || item.contentSnippet || '';
     const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-    if (imgMatch) url = imgMatch[1];
+    if (imgMatch) candidates.push({ url: imgMatch[1], width: 0 });
   }
-  return cleanImageUrl(url);
+
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => b.width - a.width);
+  return cleanImageUrl(candidates[0].url);
 }
 
 async function populate() {

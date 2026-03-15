@@ -132,7 +132,11 @@ function determineCategory(text: string): string {
 }
 
 interface MediaRSSField {
-  $: { url: string };
+  $: { 
+    url: string;
+    width?: string | number;
+    height?: string | number;
+  };
   [key: string]: unknown;
 }
 
@@ -169,35 +173,45 @@ function extractImageUrl(item: {
   content?: string;
   contentSnippet?: string;
 }): string | null {
-  let url: string | null = null;
+  const candidates: { url: string; width: number }[] = [];
 
-  // 1. Try enclosure (Standard RSS)
+  // 1. Helper to add candidates from media fields
+  const addCandidates = (field: MediaRSSField | MediaRSSField[] | undefined) => {
+    if (!field) return;
+    const items = Array.isArray(field) ? field : [field];
+    items.forEach(item => {
+      if (item.$ && item.$.url) {
+        const width = parseInt(String(item.$.width || '0'), 10);
+        candidates.push({ url: item.$.url, width });
+      }
+    });
+  };
+
+  // 2. Collect all potential images
   if (item.enclosure && item.enclosure.url) {
-    url = item.enclosure.url;
-  } else {
-    const mediaContent = item['media:content'];
-    const mediaThumbnail = item['media:thumbnail'];
+    candidates.push({ url: item.enclosure.url, width: 0 });
+  }
 
-    // 2. Try media:content (Common in WordPress/Media feeds)
-    if (mediaContent && !Array.isArray(mediaContent) && mediaContent.$ && mediaContent.$.url) {
-      url = (mediaContent.$ as { url: string }).url;
-    } else if (Array.isArray(mediaContent) && mediaContent[0] && (mediaContent[0] as MediaRSSField).$) {
-      // 3. Try another common media:content structure
-      url = (mediaContent[0] as MediaRSSField).$.url;
-    } else if (mediaThumbnail && !Array.isArray(mediaThumbnail) && mediaThumbnail.$ && mediaThumbnail.$.url) {
-      // 4. Try media:thumbnail
-      url = (mediaThumbnail.$ as { url: string }).url;
-    } else if (Array.isArray(mediaThumbnail) && mediaThumbnail[0] && (mediaThumbnail[0] as MediaRSSField).$) {
-      url = (mediaThumbnail[0] as MediaRSSField).$.url;
-    } else {
-      // 5. Try parsing from content or summary (Common in blogs)
-      const content = item.content || item.contentSnippet || '';
-      const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-      if (imgMatch && imgMatch[1]) url = imgMatch[1];
+  addCandidates(item['media:content']);
+  addCandidates(item['media:thumbnail']);
+
+  // 3. Try parsing from content as last resort
+  if (candidates.length === 0) {
+    const content = item.content || item.contentSnippet || '';
+    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+    if (imgMatch && imgMatch[1]) {
+      candidates.push({ url: imgMatch[1], width: 0 });
     }
   }
 
-  return cleanImageUrl(url);
+  if (candidates.length === 0) return null;
+
+  // 4. Sort by width descending and pick the best
+  // If widths are 0 (unknown), it will just pick the first one found
+  candidates.sort((a, b) => b.width - a.width);
+  
+  const bestUrl = candidates[0].url;
+  return cleanImageUrl(bestUrl);
 }
 
 export async function saveArticles(articles: NewsArticle[]) {
