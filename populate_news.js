@@ -36,9 +36,13 @@ function determineCategory(text) {
 
 function cleanImageUrl(url) {
   if (!url) return null;
-  // The Guardian images often come as very small thumbnails (width=140)
+  // The Guardian images (i.guim.co.uk) are signed. 
+  // Modifying parameters like width/quality invalidates the signature 's='.
   if (url.includes('i.guim.co.uk')) {
-    return url.replace(/width=\d+/, 'width=1200').replace(/quality=\d+/, 'quality=90');
+    if (url.includes('width=140') && !url.includes('&s=')) {
+       return url.replace('width=140', 'width=1200');
+    }
+    return url; 
   }
   return url;
 }

@@ -138,10 +138,27 @@ interface MediaRSSField {
 
 function cleanImageUrl(url: string | null): string | null {
   if (!url) return null;
-  // The Guardian images often come as very small thumbnails (width=140)
+  
+  // The Guardian images (i.guim.co.uk) are signed. 
+  // Modifying parameters like width/quality invalidates the signature 's='.
   if (url.includes('i.guim.co.uk')) {
-    return url.replace(/width=\d+/, 'width=1200').replace(/quality=\d+/, 'quality=90');
+    // Only attempt to swap width if it's clearly a low-res thumbnail and we can find a better version,
+    // otherwise return original to avoid 401 Invalid Signature errors.
+    if (url.includes('width=140') && !url.includes('&s=')) {
+       return url.replace('width=140', 'width=1200');
+    }
+    return url; 
   }
+
+  // Generic cleaning for other potentially unsigned providers
+  if (url.includes('?')) {
+    const [base, params] = url.split('?');
+    // If it's a thumbnail-specific param without a visible signature, try cleaning
+    if ((params.includes('w=') || params.includes('width=')) && !params.includes('sig=') && !params.includes('s=')) {
+        return base; // Try stripping params entirely for many WordPress/CDN setups
+    }
+  }
+
   return url;
 }
 
