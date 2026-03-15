@@ -38,7 +38,7 @@ export function Filters({
             variant={activeCategory === cat ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveCategory(cat)}
-            className={activeCategory === cat ? 'bg-green-600 hover:bg-green-700' : ''}
+            className={activeCategory === cat ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : ''}
           >
             {cat}
           </Button>

@@ -62,7 +62,6 @@ export function NewsGrid() {
   }, [activeCategory, activeTimeframe, searchQuery, page]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchArticles(page === 0);
   }, [fetchArticles, page]);
 
@@ -83,7 +82,6 @@ export function NewsGrid() {
   }, [handleScroll]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [activeCategory, activeTimeframe, searchQuery]);
 
@@ -135,7 +133,7 @@ export function NewsGrid() {
         <div className="flex justify-center mt-12">
             <button 
                 onClick={() => setPage(prev => prev + 1)}
-                className="text-green-600 hover:text-green-700 font-medium"
+                className="text-primary hover:text-primary/80 font-medium transition-colors"
             >
                 Daha Fazla Yükle
             </button>

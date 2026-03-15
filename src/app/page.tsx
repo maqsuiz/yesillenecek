@@ -11,7 +11,7 @@ export default function Home() {
       <footer className="border-t py-12 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} EcoPulse TR. Sürdürülebilir bir gelecek için.
+            &copy; {new Date().getFullYear()} Yeşillenecek. Sürdürülebilir bir gelecek için.
           </p>
           <div className="mt-4 flex justify-center space-x-6 text-xs text-muted-foreground">
             <a href="#" className="hover:text-green-600 transition-colors">Hakkımızda</a>

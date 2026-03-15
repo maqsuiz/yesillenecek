@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EcoPulse TR - Sürdürülebilirlik Haberciliği",
+  title: "Yeşillenecek - Sürdürülebilirlik Haberciliği",
   description: "Türkiye ve dünyadan en güncel sürdürülebilirlik ve iklim haberleri.",
 };
 

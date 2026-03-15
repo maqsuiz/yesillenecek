@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Leaf, Search, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
+import { Search, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -25,9 +26,18 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <Leaf className="h-6 w-6 text-green-600" />
-              <span className="text-xl font-bold tracking-tight">EcoPulse TR</span>
+            <Link href="/" className="flex items-center space-x-2 w-fit">
+              <div className="relative h-8 w-10 sm:h-10 sm:w-12">
+                <Image 
+                  src="/logo.png" 
+                  alt="Yeşillenecek Logo" 
+                  fill 
+                  className="object-contain"
+                  sizes="48px"
+                  priority
+                />
+              </div>
+              <span className="text-xl sm:text-2xl font-bold tracking-tight text-primary">Yeşillenecek</span>
             </Link>
           </div>
 

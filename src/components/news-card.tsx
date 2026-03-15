@@ -40,16 +40,16 @@ export function NewsCard({ article }: NewsCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-green-50 text-green-200">
+          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary/40">
             <Globe className="h-12 w-12" />
           </div>
         )}
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-          <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
+          <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-foreground">
             {article.category}
           </Badge>
           {isCarbonRelated && (
-            <Badge variant="default" className="bg-blue-600 hover:bg-blue-700">
+            <Badge variant="default" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
               Karbon Tasarrufu
             </Badge>
           )}
@@ -58,14 +58,14 @@ export function NewsCard({ article }: NewsCardProps) {
 
       <CardHeader className="p-4 pb-2">
         <div className="flex items-center space-x-2 text-xs text-muted-foreground mb-2">
-          <span className="font-semibold text-green-600">{article.source}</span>
+          <span className="font-semibold text-primary">{article.source}</span>
           <span>•</span>
           <div className="flex items-center">
             <Calendar className="mr-1 h-3 w-3" />
             {formatDistanceToNow(new Date(article.published_at), { addSuffix: true, locale: tr })}
           </div>
         </div>
-        <h3 className="line-clamp-2 text-lg font-bold leading-tight group-hover:text-green-600">
+        <h3 className="line-clamp-2 text-lg font-bold leading-tight group-hover:text-primary transition-colors">
           <a href={article.url} target="_blank" rel="noopener noreferrer">
             {article.title}
           </a>
@@ -85,7 +85,7 @@ export function NewsCard({ article }: NewsCardProps) {
           rel="noopener noreferrer" 
           className={cn(
             buttonVariants({ variant: "ghost", size: "sm" }), 
-            "ml-auto text-green-600 hover:text-green-700 hover:bg-green-50 p-0 flex items-center h-auto"
+            "ml-auto text-primary hover:text-primary/80 hover:bg-primary/10 p-2 flex items-center h-auto transition-colors"
           )}
         >
           Devamını Oku
