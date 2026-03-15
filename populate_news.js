@@ -20,9 +20,16 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 const RSS_FEEDS = [
   { url: 'https://yesilgazete.org/feed/', source: 'Yeşil Gazete', lang: 'tr' },
   { url: 'https://www.iklimhaber.org/feed/', source: 'İklim Haber', lang: 'tr' },
+  { url: 'https://bianet.org/rss/ekoloji', source: 'Bianet Ekoloji', lang: 'tr' },
   { url: 'https://www.theguardian.com/environment/rss', source: 'The Guardian', lang: 'en' },
   { url: 'https://www.carbonbrief.org/feed/', source: 'Carbon Brief', lang: 'en' },
   { url: 'https://e360.yale.edu/feed', source: 'Yale E360', lang: 'en' },
+  { url: 'http://feeds.bbci.co.uk/news/science_and_environment/rss.xml', source: 'BBC News', lang: 'en' },
+  { url: 'https://news.mongabay.com/feed/', source: 'Mongabay', lang: 'en' },
+  { url: 'https://insideclimatenews.org/feed/', source: 'Inside Climate News', lang: 'en' },
+  { url: 'https://grist.org/feed/', source: 'Grist', lang: 'en' },
+  { url: 'https://www.nytimes.com/svc/collections/v1/publish/www.nytimes.com/section/climate/rss.xml', source: 'NYT Climate', lang: 'en' },
+  { url: 'https://www.euronews.com/rss?format=mrss&level=vertical&name=green', source: 'Euronews Green', lang: 'en' },
 ];
 
 
