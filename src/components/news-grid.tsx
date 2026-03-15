@@ -14,7 +14,6 @@ export function NewsGrid() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Tümü');
-  const [activeTimeframe, setActiveTimeframe] = useState('30d');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -48,15 +47,6 @@ export function NewsGrid() {
       query = query.ilike('title', `%${searchQuery}%`);
     }
 
-    const now = new Date();
-    if (activeTimeframe === '7d') {
-      const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7)).toISOString();
-      query = query.gte('published_at', sevenDaysAgo);
-    } else if (activeTimeframe === '30d') {
-      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30)).toISOString();
-      query = query.gte('published_at', thirtyDaysAgo);
-    }
-
     const { data, error, count } = await query;
 
     if (error) {
@@ -66,7 +56,7 @@ export function NewsGrid() {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [activeCategory, activeTimeframe, searchQuery, page]);
+  }, [activeCategory, searchQuery, page]);
 
   useEffect(() => {
     fetchArticles();
@@ -74,9 +64,14 @@ export function NewsGrid() {
 
   useEffect(() => {
     setPage(1);
-  }, [activeCategory, activeTimeframe, searchQuery]);
+  }, [activeCategory, searchQuery]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  const handlePageChange = (p: number) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -96,12 +91,23 @@ export function NewsGrid() {
         </div>
       </div>
 
-      <Filters
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        activeTimeframe={activeTimeframe}
-        setActiveTimeframe={setActiveTimeframe}
-      />
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+        <Filters
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
+        
+        {!loading && articles.length > 0 && (
+          <div className="flex justify-end mb-8 md:mb-0">
+            <Pagination 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={handlePageChange}
+              className="mt-0"
+            />
+          </div>
+        )}
+      </div>
 
       {errorState && (
         <div className="mb-8 p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg text-center">
@@ -134,14 +140,14 @@ export function NewsGrid() {
           )}
 
           {!loading && articles.length > 0 && (
-            <Pagination 
-              currentPage={page} 
-              totalPages={totalPages} 
-              onPageChange={(p) => {
-                setPage(p);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }} 
-            />
+            <div className="flex justify-end mt-12">
+              <Pagination 
+                currentPage={page} 
+                totalPages={totalPages} 
+                onPageChange={handlePageChange}
+                className="mt-0"
+              />
+            </div>
           )}
         </>
       )}

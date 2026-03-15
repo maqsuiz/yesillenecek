@@ -96,7 +96,7 @@ export function Pagination({
   };
 
   return (
-    <nav className={cn("flex items-center justify-center space-x-2 mt-12", className)}>
+    <nav className={cn("flex items-center justify-end space-x-2 mt-12", className)}>
       <Button
         variant="outline"
         size="sm"
