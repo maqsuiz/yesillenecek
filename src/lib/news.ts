@@ -136,6 +136,15 @@ interface MediaRSSField {
   [key: string]: unknown;
 }
 
+function cleanImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  // The Guardian images often come as very small thumbnails (width=140)
+  if (url.includes('i.guim.co.uk')) {
+    return url.replace(/width=\d+/, 'width=1200').replace(/quality=\d+/, 'quality=90');
+  }
+  return url;
+}
+
 function extractImageUrl(item: {
   enclosure?: { url: string };
   'media:content'?: MediaRSSField | MediaRSSField[];
@@ -143,37 +152,35 @@ function extractImageUrl(item: {
   content?: string;
   contentSnippet?: string;
 }): string | null {
+  let url: string | null = null;
+
   // 1. Try enclosure (Standard RSS)
-  if (item.enclosure && item.enclosure.url) return item.enclosure.url;
+  if (item.enclosure && item.enclosure.url) {
+    url = item.enclosure.url;
+  } else {
+    const mediaContent = item['media:content'];
+    const mediaThumbnail = item['media:thumbnail'];
 
-  const mediaContent = item['media:content'];
-  const mediaThumbnail = item['media:thumbnail'];
-
-  // 2. Try media:content (Common in WordPress/Media feeds)
-  if (mediaContent && !Array.isArray(mediaContent) && mediaContent.$ && mediaContent.$.url) {
-    return (mediaContent.$ as { url: string }).url;
+    // 2. Try media:content (Common in WordPress/Media feeds)
+    if (mediaContent && !Array.isArray(mediaContent) && mediaContent.$ && mediaContent.$.url) {
+      url = (mediaContent.$ as { url: string }).url;
+    } else if (Array.isArray(mediaContent) && mediaContent[0] && (mediaContent[0] as MediaRSSField).$) {
+      // 3. Try another common media:content structure
+      url = (mediaContent[0] as MediaRSSField).$.url;
+    } else if (mediaThumbnail && !Array.isArray(mediaThumbnail) && mediaThumbnail.$ && mediaThumbnail.$.url) {
+      // 4. Try media:thumbnail
+      url = (mediaThumbnail.$ as { url: string }).url;
+    } else if (Array.isArray(mediaThumbnail) && mediaThumbnail[0] && (mediaThumbnail[0] as MediaRSSField).$) {
+      url = (mediaThumbnail[0] as MediaRSSField).$.url;
+    } else {
+      // 5. Try parsing from content or summary (Common in blogs)
+      const content = item.content || item.contentSnippet || '';
+      const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+      if (imgMatch && imgMatch[1]) url = imgMatch[1];
+    }
   }
-  
-  // 3. Try another common media:content structure
-  if (Array.isArray(mediaContent) && mediaContent[0] && (mediaContent[0] as MediaRSSField).$) {
-    return (mediaContent[0] as MediaRSSField).$.url;
-  }
 
-  // 4. Try media:thumbnail
-  if (mediaThumbnail && !Array.isArray(mediaThumbnail) && mediaThumbnail.$ && mediaThumbnail.$.url) {
-    return (mediaThumbnail.$ as { url: string }).url;
-  }
-  
-  if (Array.isArray(mediaThumbnail) && mediaThumbnail[0] && (mediaThumbnail[0] as MediaRSSField).$) {
-    return (mediaThumbnail[0] as MediaRSSField).$.url;
-  }
-
-  // 5. Try parsing from content or summary (Common in blogs)
-  const content = item.content || item.contentSnippet || '';
-  const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-  if (imgMatch && imgMatch[1]) return imgMatch[1];
-
-  return null;
+  return cleanImageUrl(url);
 }
 
 export async function saveArticles(articles: NewsArticle[]) {

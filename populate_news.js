@@ -34,14 +34,31 @@ function determineCategory(text) {
   return 'Sürdürülebilirlik';
 }
 
+function cleanImageUrl(url) {
+  if (!url) return null;
+  // The Guardian images often come as very small thumbnails (width=140)
+  if (url.includes('i.guim.co.uk')) {
+    return url.replace(/width=\d+/, 'width=1200').replace(/quality=\d+/, 'quality=90');
+  }
+  return url;
+}
+
 function extractImageUrl(item) {
-  if (item.enclosure && item.enclosure.url) return item.enclosure.url;
-  if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) return item['media:content'].$.url;
-  if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$) return item['media:content'][0].$.url;
-  if (item['media:thumbnail'] && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) return item['media:thumbnail'].$.url;
-  const content = item.content || item.contentSnippet || '';
-  const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-  return imgMatch ? imgMatch[1] : null;
+  let url = null;
+  if (item.enclosure && item.enclosure.url) {
+    url = item.enclosure.url;
+  } else if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
+    url = item['media:content'].$.url;
+  } else if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$) {
+    url = item['media:content'][0].$.url;
+  } else if (item['media:thumbnail'] && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) {
+    url = item['media:thumbnail'].$.url;
+  } else {
+    const content = item.content || item.contentSnippet || '';
+    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+    if (imgMatch) url = imgMatch[1];
+  }
+  return cleanImageUrl(url);
 }
 
 async function populate() {
