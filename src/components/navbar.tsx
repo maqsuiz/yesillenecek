@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, RefreshCw, Sun, Moon } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';

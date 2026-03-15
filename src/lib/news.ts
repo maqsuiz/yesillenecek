@@ -122,23 +122,41 @@ function determineCategory(text: string): string {
   return 'Sürdürülebilirlik';
 }
 
-function extractImageUrl(item: any): string | null {
+interface MediaRSSField {
+  $: { url: string };
+  [key: string]: unknown;
+}
+
+function extractImageUrl(item: {
+  enclosure?: { url: string };
+  'media:content'?: MediaRSSField | MediaRSSField[];
+  'media:thumbnail'?: MediaRSSField | MediaRSSField[];
+  content?: string;
+  contentSnippet?: string;
+}): string | null {
   // 1. Try enclosure (Standard RSS)
   if (item.enclosure && item.enclosure.url) return item.enclosure.url;
 
+  const mediaContent = item['media:content'];
+  const mediaThumbnail = item['media:thumbnail'];
+
   // 2. Try media:content (Common in WordPress/Media feeds)
-  if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
-    return item['media:content'].$.url;
+  if (mediaContent && !Array.isArray(mediaContent) && mediaContent.$ && mediaContent.$.url) {
+    return (mediaContent.$ as { url: string }).url;
   }
   
   // 3. Try another common media:content structure
-  if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$) {
-    return item['media:content'][0].$.url;
+  if (Array.isArray(mediaContent) && mediaContent[0] && (mediaContent[0] as MediaRSSField).$) {
+    return (mediaContent[0] as MediaRSSField).$.url;
   }
 
   // 4. Try media:thumbnail
-  if (item['media:thumbnail'] && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) {
-    return item['media:thumbnail'].$.url;
+  if (mediaThumbnail && !Array.isArray(mediaThumbnail) && mediaThumbnail.$ && mediaThumbnail.$.url) {
+    return (mediaThumbnail.$ as { url: string }).url;
+  }
+  
+  if (Array.isArray(mediaThumbnail) && mediaThumbnail[0] && (mediaThumbnail[0] as MediaRSSField).$) {
+    return (mediaThumbnail[0] as MediaRSSField).$.url;
   }
 
   // 5. Try parsing from content or summary (Common in blogs)
