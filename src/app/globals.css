@@ -120,9 +120,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), sans-serif;
+    line-height: 1.6;
   }
 }
