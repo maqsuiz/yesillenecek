@@ -1,7 +1,15 @@
 import Parser from 'rss-parser';
 import { supabaseAdmin } from './supabase';
 
-const parser = new Parser();
+const parser = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'media:content'],
+      ['media:thumbnail', 'media:thumbnail'],
+    ],
+  }
+});
+
 
 export interface NewsArticle {
   title: string;
